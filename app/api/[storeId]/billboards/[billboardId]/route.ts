@@ -73,18 +73,24 @@ export async function PATCH(
     return new NextResponse("Internal error", { status: 500 });
   }
 }
+
 export async function DELETE(
   req: Request,
-  { params }: { params: { storeId: string; billboardId: string } }
+  {
+    params,
+  }: {
+    params: { storeId: string; billboardId: string };
+  }
 ) {
   try {
     const { userId } = auth();
+
     if (!userId) {
       return new NextResponse("Unauthenticated", { status: 401 });
     }
 
     if (!params.billboardId) {
-      return new NextResponse("billboard is required", { status: 400 });
+      return new NextResponse("Billboard Id is required", { status: 400 });
     }
 
     const storeByUserId = await prismadb.store.findFirst({
@@ -95,18 +101,16 @@ export async function DELETE(
     });
 
     if (!storeByUserId) {
-      return new NextResponse("unautherized is required", { status: 400 });
+      return new NextResponse("Unautherized", { status: 403 });
     }
-
-    const billborad = await prismadb.billboard.deleteMany({
+    const billboard = await prismadb.billboard.deleteMany({
       where: {
         id: params.billboardId,
       },
     });
-
-    return NextResponse.json(billborad);
+    return NextResponse.json(billboard);
   } catch (error) {
-    console.log("BILLBOARD_PATCH", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.log("[BILLBOARD_DELETE]", error);
+    return new NextResponse("Internal Error", { status: 500 });
   }
 }

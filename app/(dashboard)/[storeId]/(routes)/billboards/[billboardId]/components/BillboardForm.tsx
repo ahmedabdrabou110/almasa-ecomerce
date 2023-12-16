@@ -21,7 +21,6 @@ import toast from "react-hot-toast";
 import axios from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { AlertModal } from "@/components/modals/alert-modal";
-import { ApiAlert } from "@/components/ui/api-alert";
 import UploadImage from "@/components/ui/upload-image";
 interface BillboardFormProps {
   initialData: Billboard | null;
@@ -67,6 +66,7 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
       } else {
         await axios.post(`/api/${params.storeId}/billboards`, data);
       }
+      router.push(`/${params.storeId}/billboards`);
       router.refresh();
       toast.success(toastMessage);
     } catch (error) {
@@ -76,16 +76,20 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
     }
   };
 
-  const onConfirm = async () => {
+  const onDelete = async () => {
     try {
       setLoading(true);
-      await axios.delete(`/api/store/${params.storeId}`);
+      await axios.delete(
+        `/api/${params.storeId}/billboards/${params.billboardId}`
+      );
+      router.push(`/${params.storeId}/billboards`);
       router.refresh();
-      toast.success("store deleted.");
+      toast.success("billboard deleted.");
     } catch (error) {
-      toast.error("Make Sure that all products and categories are removed.");
+      toast.error("Makesure that all products and categories are removed.");
     } finally {
       setLoading(false);
+      setOpen(false);
     }
   };
 
@@ -95,7 +99,7 @@ const BillboardForm: React.FC<BillboardFormProps> = ({ initialData }) => {
         isOpen={open}
         loading={loading}
         onClose={() => setOpen(false)}
-        onConfirm={onConfirm}
+        onConfirm={onDelete}
       />
       <div className="flex items-center justify-between">
         <Heading title={title} description={description} />
